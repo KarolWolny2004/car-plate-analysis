@@ -7,5 +7,6 @@ class DetectionResult(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String)
-    plate_number = Column(String)
+    plate_number = Column(String, nullable=True)
+    status = Column(String, default="PENDING")
     created_at = Column(DateTime, default=func.now())
