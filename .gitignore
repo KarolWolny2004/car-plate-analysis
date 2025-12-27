@@ -208,3 +208,7 @@ __marimo__/
 
 #SQL
 sql_app.db
+
+#PyTorch
+*.pt
+*.pth
