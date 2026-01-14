@@ -4,7 +4,6 @@ from app.analysis.detector import detect_plate
 from app.storage.database import SessionLocal
 from app.storage import models
 
-# Konfiguracja Celery (zakładamy, że Redis działa na porcie 6379)
 celery_app = Celery(
     "worker",
     broker="redis://localhost:6379/0",
@@ -26,9 +25,12 @@ def analyze_plate_task(detection_id: int, image_hex: str):
         record.status = "PROCESSING"
         db.commit()
 
-        # 3. Wykonaj analizę (symulujemy, że to trwa)
+        # 3. Wykonaj analizę
         image_bytes = bytes.fromhex(image_hex)
-        result_plate = detect_plate(image_bytes)
+        
+        # --- ZMIANA: Przekazujemy job_id=detection_id ---
+        result_plate = detect_plate(image_bytes, job_id=detection_id)
+        # ------------------------------------------------
 
         # 4. Zapisz wynik i zmień status na COMPLETED
         record.plate_number = result_plate

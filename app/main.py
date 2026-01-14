@@ -1,23 +1,31 @@
-from fastapi import FastAPI, UploadFile, File, Depends
+from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
+from fastapi.staticfiles import StaticFiles  # <--- NOWY IMPORT
 from sqlalchemy.orm import Session
-# from app.analysis.detector import detect_plate
 from app.storage import models, database
-from fastapi import HTTPException
 from app.worker import analyze_plate_task
+import os  # <--- NOWY IMPORT
 
 models.Base.metadata.create_all(bind=database.engine)
+
 app = FastAPI(
     title="Car Plate Analysis API",
-    description="API do analizy tablic rejestracyjnych (Zaawansowane Programowanie / Dobre Praktyki)",
+    description="API do analizy tablic rejestracyjnych",
     version="1.0.0"
 )
+
+# --- NOWE: Montowanie folderu debugowania ---
+# Upewniamy się, że folder istnieje (na wypadek restartu aplikacji)
+os.makedirs("debug_images", exist_ok=True)
+# Udostępniamy pliki z folderu "debug_images" pod ścieżką URL "/debug"
+app.mount("/debug", StaticFiles(directory="debug_images"), name="debug")
+# --------------------------------------------
 
 @app.get("/")
 def read_root():
     return {
         "project": "Car Plate Analysis",
         "status": "Running",
-        "message": "Witaj w systemie analizy obrazu!"
+        "message": "Witaj! Podgląd zdjęć dostępny pod /debug/"
     }
 
 @app.get("/health")

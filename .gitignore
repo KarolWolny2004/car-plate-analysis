@@ -208,3 +208,10 @@ __marimo__/
 
 #SQL
 sql_app.db
+
+#PyTorch
+*.pt
+*.pth
+
+# Debugging and temporary files
+debug_images/
