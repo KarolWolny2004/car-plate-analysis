@@ -1,9 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
-from fastapi.staticfiles import StaticFiles  # <--- NOWY IMPORT
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from app.storage import models, database
 from app.worker import analyze_plate_task
-import os  # <--- NOWY IMPORT
+import os
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -13,12 +13,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# --- NOWE: Montowanie folderu debugowania ---
-# Upewniamy się, że folder istnieje (na wypadek restartu aplikacji)
 os.makedirs("debug_images", exist_ok=True)
-# Udostępniamy pliki z folderu "debug_images" pod ścieżką URL "/debug"
 app.mount("/debug", StaticFiles(directory="debug_images"), name="debug")
-# --------------------------------------------
 
 @app.get("/")
 def read_root():
@@ -37,10 +33,8 @@ async def analyze_image_async(
         file: UploadFile = File(...),
         db: Session = Depends(database.get_db)
 ):
-    # 1. Odczytaj plik
     content = await file.read()
 
-    # 2. Stwórz wstępny rekord w bazie
     new_job = models.DetectionResult(
         filename=file.filename,
         status="PENDING"
@@ -49,8 +43,6 @@ async def analyze_image_async(
     db.commit()
     db.refresh(new_job)
 
-    # 3. Wyślij zadanie do kolejki (przekazujemy ID i obraz jako tekst HEX)
-    # .delay() sprawia, że funkcja nie wykonuje się teraz, tylko leci do Redisa
     analyze_plate_task.delay(new_job.id, content.hex())
 
     return {

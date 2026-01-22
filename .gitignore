@@ -214,4 +214,9 @@ sql_app.db
 *.pth
 
 # Debugging and temporary files
-debug_images/
+debug_failures/
+evaluate-debug.py
+
+# Images
+datasets/polish_plates/images/
+datasets/polish_plates/labels/
