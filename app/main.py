@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from app.storage import models, database
 from app.worker import analyze_plate_task
+from app.analysis import detector
 import os
 
 models.Base.metadata.create_all(bind=database.engine)
@@ -13,20 +14,30 @@ app = FastAPI(
     version="1.0.0"
 )
 
-os.makedirs("debug_images", exist_ok=True)
-app.mount("/debug", StaticFiles(directory="debug_images"), name="debug")
-
-@app.get("/")
-def read_root():
-    return {
-        "project": "Car Plate Analysis",
-        "status": "Running",
-        "message": "Witaj! Podgląd zdjęć dostępny pod /debug/"
-    }
+# os.makedirs("debug_images", exist_ok=True)
+# app.mount("/debug", StaticFiles(directory="debug_images"), name="debug")
 
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+@app.post("/analyze")
+async def analyze_image_sync(file: UploadFile = File(...)):
+    try:
+        content = await file.read()
+        
+        plate_number = detector.detect_plate(content)
+        
+        return {
+            "filename": file.filename,
+            "plate_number": plate_number,
+            "status": "COMPLETED"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Błąd podczas przetwarzania obrazu: {str(e)}"
+        )
 
 @app.post("/analyze-async")
 async def analyze_image_async(

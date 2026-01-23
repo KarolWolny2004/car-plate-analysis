@@ -19,7 +19,7 @@ else:
 
 print("Modele gotowe.")
 
-DEBUG_DIR = "debug_images"
+DEBUG_DIR = "debug_failures"
 os.makedirs(DEBUG_DIR, exist_ok=True)
 
 def crop_plate_directly(img_cv2):
