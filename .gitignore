@@ -208,3 +208,15 @@ __marimo__/
 
 #SQL
 sql_app.db
+
+#PyTorch
+
+*.pth
+
+# Debugging and temporary files
+debug_failures/
+evaluate-debug.py
+
+# Images
+datasets/polish_plates/images/
+datasets/polish_plates/labels/
